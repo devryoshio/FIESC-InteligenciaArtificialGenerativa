@@ -28,3 +28,5 @@ Aqui ví que eu preciso começar com a tela de login, tanto fazendo backend como
 
 ## Login e cadastro
 
+- [Tela feito com React](./login_react.md)
+- A primeira vez que pedi para Gemini fazer o backend com fastapi, ele me fez sem banco de dados e mocado os dados;
