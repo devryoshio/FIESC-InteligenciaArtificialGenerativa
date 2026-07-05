@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import Register from './pages/Register'; // <-- Importe aqui
+import Dashboard from './pages/Dashboard';
 
 const DashboardTemp = () => (
   <div className="flex h-screen items-center justify-center bg-slate-900 text-white">
@@ -15,7 +16,7 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} /> {/* <-- Adicione a rota aqui */}
-        <Route path="/dashboard" element={<DashboardTemp />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>

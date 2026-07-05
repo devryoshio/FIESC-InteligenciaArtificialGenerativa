@@ -34,3 +34,8 @@ Aqui ví que eu preciso começar com a tela de login, tanto fazendo backend como
 - [Junto e misturando: união entre front e back](./juntando_back_front.md)
 
 
+## Dashboard
+
+Fiquei na dúvida se realmente é esse nome, mas deixei para lá 
+
+- [Dashbord  a primeira tela](./primeiraVersaoDash.md) Gostei bastante porém não esta funcional ainda. 

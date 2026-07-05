@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from database import engine, Base
-from routers import auth
+from routers import auth, practice
 
 # Cria as tabelas automaticamente no SQLite assim que o servidor liga
 Base.metadata.create_all(bind=engine)
@@ -22,6 +22,7 @@ app.add_middleware(
 
 # Inclui as rotas do arquivo routers/auth.py
 app.include_router(auth.router)
+app.include_router(practice.router)
 
 @app.get("/")
 def read_root():
