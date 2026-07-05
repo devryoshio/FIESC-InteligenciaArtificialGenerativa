@@ -8,17 +8,39 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simula uma requisição para a API de 1.5 segundos antes de ir para o Dashboard
-    setTimeout(() => {
-      setIsLoading(false);
-      navigate('/dashboard');
-    }, 1500);
-  };
+    try {
+      // Faz a chamada real para o seu FastAPI
+      const response = await fetch('http://localhost:8000/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Se o FastAPI devolver erro (401, por exemplo), joga pro bloco catch
+        throw new Error(data.detail || 'Erro ao fazer login.');
+      }
+
+      // SUCESSO: Salva o token falso no navegador e vai para o Dashboard
+      localStorage.setItem('token', data.token);
+      navigate('/dashboard');
+
+    } catch (error) {
+      // Exibe o erro real do banco de dados (Ex: "E-mail ou senha incorretos")
+      alert(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
   return (
     <div className="min-h-screen bg-[#0f172a] flex items-center justify-center p-4 relative overflow-hidden">
       {/* Efeitos de fundo (Gradients) */}

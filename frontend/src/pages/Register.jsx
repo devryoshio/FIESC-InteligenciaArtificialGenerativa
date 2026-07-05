@@ -9,15 +9,35 @@ export default function Register() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simula a criação da conta e redireciona para o Dashboard
-    setTimeout(() => {
+    try {
+      // Envia os dados para salvar no SQLite
+      const response = await fetch("http://localhost:8000/api/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name, email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Se o e-mail já existir, o FastAPI vai avisar e cairá aqui
+        throw new Error(data.detail || "Erro ao criar conta.");
+      }
+
+      // SUCESSO: Avisa o usuário e o joga para a tela de login
+      alert("Conta criada com sucesso! Agora é só fazer o login.");
+      navigate("/login");
+    } catch (error) {
+      alert(error.message);
+    } finally {
       setIsLoading(false);
-      navigate("/dashboard");
-    }, 1500);
+    }
   };
 
   return (

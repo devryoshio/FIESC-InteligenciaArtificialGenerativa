@@ -30,3 +30,7 @@ Aqui ví que eu preciso começar com a tela de login, tanto fazendo backend como
 
 - [Tela feito com React](./login_react.md)
 - A primeira vez que pedi para Gemini fazer o backend com fastapi, ele me fez sem banco de dados e mocado os dados;
+- [A versao com banco de Dados](./backendlogin.md)
+- [Junto e misturando: união entre front e back](./juntando_back_front.md)
+
+
