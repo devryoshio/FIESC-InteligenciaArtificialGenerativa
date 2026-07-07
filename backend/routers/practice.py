@@ -1,5 +1,6 @@
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends
 from sqlalchemy.orm import Session
+from sqlalchemy import func  # <-- IMPORTANTE: Para calcular média e contagem
 from database import get_db
 import speech_recognition as sr
 from pydub import AudioSegment
@@ -25,10 +26,10 @@ def calcular_porcentagem_acerto(frase_original: str, frase_dita: str) -> int:
 
 @router.post("/analyze-voice")
 async def analyze_voice(
-    lesson_id: int = Form(...), # NOVO: Recebe o ID da lição
+    lesson_id: int = Form(...),
     phrase: str = Form(...), 
     file: UploadFile = File(...),
-    db: Session = Depends(get_db) # NOVO: Conexão com o banco de dados
+    db: Session = Depends(get_db)
 ):
     try:
         audio_bytes = await file.read()
@@ -52,7 +53,6 @@ async def analyze_voice(
         nota = calcular_porcentagem_acerto(phrase, texto_transcrito)
         transcript_final = texto_transcrito if texto_transcrito else "(Áudio não compreendido)"
         
-        # NOVO: Salva o resultado no banco de dados!
         nova_tentativa = models.AttemptModel(
             lesson_id=lesson_id,
             score=nota,
@@ -69,3 +69,32 @@ async def analyze_voice(
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao processar áudio: {str(e)}")
+
+# ==========================================================
+# NOVA ROTA: Gera o resumo de desempenho do aluno
+# ==========================================================
+@router.get("/attempts/summary")
+def get_attempts_summary(db: Session = Depends(get_db)):
+    # 1. Calcula o total de tentativas e a média das notas
+    total = db.query(func.count(models.AttemptModel.id)).scalar() or 0
+    media = db.query(func.avg(models.AttemptModel.score)).scalar() or 0
+    
+    # 2. Pega as últimas 5 tentativas realizadas
+    attempts = db.query(models.AttemptModel).order_by(models.AttemptModel.created_at.desc()).limit(5).all()
+    
+    history = []
+    for att in attempts:
+        # Busca o texto da frase original correspondente
+        lesson = db.query(models.LessonModel).filter(models.LessonModel.id == att.lesson_id).first()
+        history.append({
+            "id": att.id,
+            "phrase": lesson.phrase if lesson else "Frase removida",
+            "score": att.score,
+            "date": att.created_at.strftime("%H:%M - %d/%m")
+        })
+        
+    return {
+        "total_attempts": total,
+        "average_score": int(media),
+        "history": history
+    }

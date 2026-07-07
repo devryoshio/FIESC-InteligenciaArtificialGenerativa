@@ -46,5 +46,7 @@ Fiquei na dúvida se realmente é esse nome, mas deixei para lá
 
 A ideia era colocar adicionar áudio, mas no final achei melhor só adicionar o texto e usar a biblioteca para pronunciar 
 
-- [Adicionando a lição](./addcionando_ouvi_voz.md)
-- []
+
+- [Adicionando a lição](./adicionandoLicao.md)
+- [Adicionando ouvir a propria voz](./addcionando_ouvi_voz.md)
+- [Adicionando Pontuacao](./adicionandoPortucao.md)
