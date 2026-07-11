@@ -1,12 +1,10 @@
-Pela rubrica que você enviou, o **README vale 8 dos 30 pontos** (mais de 25% da nota) e ainda ajuda a demonstrar o uso do agente de codificação (mais 4 pontos). Ou seja, um README bem escrito pode influenciar **12/30 pontos**.
 
-O professor também diz explicitamente que valoriza uma análise crítica da experiência com o agente. Então o README deve parecer um relatório técnico, não apenas um manual de instalação.
-
-Segue uma versão completa que atende praticamente todos os itens da avaliação.
 
 # Shadow Speak
 
 ## Sistema Inteligente de Treinamento de Pronúncia em Inglês
+
+Link do projeto: [https://fiesc-inteligenciaartificialgenerativa.onrender.com/](https://fiesc-inteligenciaartificialgenerativa.onrender.com/)
 
 ## Sobre o Projeto
 
