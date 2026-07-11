@@ -14,7 +14,7 @@ const handleLogin = async (e) => {
 
     try {
       // Faz a chamada real para o seu FastAPI
-      const response = await fetch('http://localhost:8000/api/login', {
+      const response = await fetch('/api/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

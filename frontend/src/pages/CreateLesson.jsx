@@ -18,7 +18,7 @@ export default function CreateLesson() {
       const formData = new FormData();
       formData.append('phrase', phrase);
 
-      const response = await fetch('http://localhost:8000/api/lessons/create', {
+      const response = await fetch('/api/lessons/create', {
         method: 'POST',
         body: formData,
       });

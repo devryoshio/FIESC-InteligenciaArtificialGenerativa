@@ -1,0 +1,18 @@
+version: "3.9"
+
+services:
+
+  shadowspeak:
+
+    build: .
+
+    container_name: shadowspeak
+
+    ports:
+      - "8000:8000"
+
+    restart: unless-stopped
+
+    volumes:
+      - ./backend/uploads:/app/uploads
+      - ./backend/shadow_speak.db:/app/shadow_speak.db

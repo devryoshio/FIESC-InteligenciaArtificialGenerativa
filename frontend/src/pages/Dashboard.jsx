@@ -103,7 +103,7 @@ export default function Dashboard() {
       formData.append('phrase', currentLesson.phrase);
       formData.append('file', audioBlob, 'voice.webm');
 
-      const response = await fetch('http://localhost:8000/api/analyze-voice', {
+      const response = await fetch('/api/analyze-voice', {
         method: 'POST',
         body: formData,
       });
