@@ -46,24 +46,7 @@ As funcionalidades que utilizarão IA Generativa futuramente permanecem simulada
 
 ---
 
-# Como a IA será integrada futuramente
 
-O sistema foi projetado para integrar um LLM em diversas etapas do processo de aprendizagem.
-
-Entre as funcionalidades previstas estão:
-
-* geração automática de novas lições;
-* adaptação da dificuldade conforme o desempenho do aluno;
-* feedback textual detalhado sobre erros de pronúncia;
-* criação automática de diálogos;
-* geração de exercícios personalizados;
-* explicações gramaticais;
-* plano de estudos individualizado;
-* conversação em linguagem natural.
-
-Toda a arquitetura do backend foi organizada para permitir essa integração sem necessidade de grandes alterações.
-
----
 
 # Arquitetura
 
@@ -161,7 +144,194 @@ Exemplos de solicitações utilizadas:
 
 Essa abordagem produziu resultados significativamente melhores do que tentar gerar toda a aplicação de uma única vez.
 
+
 ---
+
+# Arquitetura da IA Generativa
+
+## Fluxo da aplicação
+
+```text
+Áudio do aluno
+        │
+        ▼
+Reconhecimento de fala (SpeechRecognition)
+        │
+        ▼
+Texto transcrito
+        │
+        ▼
+System Prompt
+        │
+        ▼
+GPT-4o-mini
+        │
+        ▼
+JSON estruturado
+        │
+        ▼
+Backend (FastAPI)
+        │
+        ▼
+Dashboard / Feedback
+```
+
+O modelo de linguagem é utilizado apenas após a transcrição da fala. Dessa forma, o LLM trabalha exclusivamente sobre texto, reduzindo a complexidade da aplicação e permitindo separar claramente as responsabilidades entre reconhecimento de fala e geração de feedback.
+
+---
+
+# Decisões de Engenharia de LLM
+
+## Escolha do modelo
+
+O sistema utiliza o modelo **GPT-4o-mini**, acessado através da API oficial da OpenAI.
+
+A escolha foi motivada pelos seguintes fatores:
+
+* boa qualidade na compreensão de linguagem natural;
+* baixa latência;
+* custo reduzido;
+* suporte a respostas estruturadas em JSON;
+* integração simples com o SDK oficial.
+
+Como a aplicação realiza análise textual da transcrição da fala, o GPT-4o-mini apresentou desempenho suficiente sem necessidade de utilizar modelos maiores.
+
+---
+
+## Framework utilizado
+
+Foi utilizado o SDK oficial da OpenAI (`openai-python`).
+
+Optou-se por chamadas diretas à API em vez de frameworks como LangChain ou LangGraph devido à simplicidade da arquitetura.
+
+Como o projeto realiza apenas uma interação principal com o modelo, a utilização de frameworks adicionais aumentaria a complexidade sem benefícios significativos.
+
+Essa decisão também facilita a manutenção e reduz dependências externas.
+
+---
+
+## Engenharia de Prompt
+
+O comportamento do modelo é controlado através de um **System Prompt** estruturado.
+
+O prompt define:
+
+* persona do modelo como coach de inglês;
+* especialização em fonética para falantes de português brasileiro;
+* critérios para avaliação da pronúncia;
+* formato obrigatório da resposta em JSON;
+* tom construtivo utilizado no feedback;
+* restrições para evitar respostas fora do domínio da aplicação.
+
+A organização do prompt em seções melhora a previsibilidade das respostas e facilita futuras modificações.
+
+---
+
+## Estratégia de Prompting
+
+O projeto utiliza uma combinação de técnicas de Prompt Engineering:
+
+* **Role Prompting**, definindo explicitamente o modelo como especialista em pronúncia.
+* **Structured Prompting**, organizando o prompt em blocos semânticos.
+* **Output Constrained**, exigindo resposta exclusivamente em JSON.
+* Uso de **tags XML** para separar contexto, instruções e formato esperado.
+
+Essa estratégia produz respostas mais consistentes e reduz ambiguidades durante a geração do feedback.
+
+---
+
+# Configuração do Modelo
+
+Os principais parâmetros utilizados são:
+
+| Parâmetro       | Valor       | Justificativa                                                           |
+| --------------- | ----------- | ----------------------------------------------------------------------- |
+| Modelo          | GPT-4o-mini | Equilíbrio entre qualidade, velocidade e custo                          |
+| Temperature     | 0.3         | Reduz variação entre respostas, produzindo avaliações mais consistentes |
+| Response Format | JSON        | Facilita o processamento automático pelo backend                        |
+
+Durante os testes foram avaliados diferentes valores de temperatura. Valores maiores produziram feedbacks mais variados para a mesma entrada, enquanto 0.3 apresentou melhor estabilidade para um sistema de avaliação.
+
+---
+
+# Structured Outputs
+
+O sistema utiliza respostas estruturadas em JSON através do parâmetro:
+
+```python
+response_format={"type":"json_object"}
+```
+
+Isso garante que o backend receba sempre um objeto estruturado contendo:
+
+* feedback textual;
+* palavras pronunciadas incorretamente;
+* representação fonética (IPA);
+* sugestões de melhoria.
+
+Essa abordagem elimina a necessidade de interpretar respostas em linguagem natural, reduzindo erros de integração entre o modelo e a aplicação.
+
+---
+
+# Ferramentas (Tools)
+
+Atualmente o sistema utiliza uma ferramenta especializada responsável por enriquecer a análise fonética.
+
+A ferramenta consulta uma base estruturada contendo informações sobre fonemas e suas representações fonéticas.
+
+Essa separação evita concentrar conhecimento específico diretamente no prompt e facilita futuras expansões da aplicação.
+
+---
+
+# Evolução planejada: RAG para aprendizado personalizado
+
+Como evolução da arquitetura, está previsto um módulo baseado em **Retrieval-Augmented Generation (RAG)**.
+
+O sistema registrará o histórico de desempenho do estudante, identificando erros recorrentes de pronúncia.
+
+Esses erros serão utilizados como consulta para uma base vetorial contendo materiais didáticos organizados por fonema, dificuldade e tipo de erro.
+
+O fluxo será:
+
+```text
+Histórico do aluno
+        │
+        ▼
+Identificação dos erros recorrentes
+        │
+        ▼
+Busca semântica (RAG)
+        │
+        ▼
+Materiais relacionados
+        │
+        ▼
+GPT-4o-mini
+        │
+        ▼
+Lição personalizada
+```
+
+Essa arquitetura permitirá gerar automaticamente novas lições adaptadas às dificuldades individuais de cada estudante, sem necessidade de alterar o System Prompt ou o código da aplicação.
+
+---
+
+# Limitações
+
+Algumas limitações observadas durante o desenvolvimento foram:
+
+* dependência da qualidade da transcrição de voz;
+* dificuldade em avaliar pronúncia apenas por texto transcrito;
+* sensibilidade do feedback às instruções presentes no System Prompt;
+* necessidade de controlar cuidadosamente o formato de saída do modelo.
+
+Essas limitações motivaram o uso de respostas estruturadas e a definição explícita das regras de comportamento do modelo.
+
+---
+
+
+
+
 
 # O que funcionou bem
 
